@@ -7,8 +7,7 @@
 
 typedef struct hash_map HashMap;
 
-// Key type, change it according to your task variant
-typedef void HashMapKey;
+typedef int32_t HashMapKey;
 
 typedef String HashMapValue;
 
