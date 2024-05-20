@@ -77,8 +77,30 @@ HashMapValue* hash_map_find(const HashMap* const map, const HashMapKey key) {
 // Insert value to map by key. Return true if insertion was successful and
 // such key-value pair was _unique_, false - otherwise.
 bool hash_map_insert(HashMap* const map, const HashMapKey key, const HashMapValue value) {
-    if (hash_map_load_factor(map) >= 1) {
-        return false;  // Map is full
+    if (!map) return false;
+    // Удваиваем capacity хеш-таблицы при превышении коэффициента заполнения load_factor
+    const double resize_factor = 0.75;
+    if ((double)map->size / map->capacity >= resize_factor) {
+        HashMapPair* old_pairs = map->pairs;
+        size_t old_capacity = map->capacity;
+        map->capacity *= 2;
+        map->pairs = calloc(map->capacity, sizeof(HashMapPair));
+        if (map->pairs == NULL) {
+            map->pairs = old_pairs;  // Если не удалось выделить память, возвращаемся к предыдущей хеш-таблице
+            map->capacity = old_capacity;
+            return false;
+        }
+        for (size_t i = 0; i < old_capacity; i++) {
+            if (!string_empty(&old_pairs[i].value)) {
+                hash_map_insert(map, old_pairs[i].key, old_pairs[i].value);
+            }
+        }
+        free(old_pairs);
+    }
+
+    // Процесс вставки элемента не изменился
+    if (map->size >= map->capacity) {
+        return false;
     }
 
     HashMapPair* pair = &map->pairs[hash_map_hash(map, key)];
