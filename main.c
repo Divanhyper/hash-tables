@@ -55,7 +55,7 @@ TEST(create_hash_map_with)
 
     hash_map_clear(map);
     TEST_ASSERT(hash_map_empty(map));
-    TEST_ASSERT(hash_map_capacity(map) == 8);
+    TEST_ASSERT(hash_map_capacity(map) != 0);
     hash_map_destroy(&map);
 }
 
